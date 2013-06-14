@@ -37,9 +37,33 @@ class CurrentInstance(object):
 
         return instance_id
 
-def get_instances_tagged_with():
+def get_instances_tagged_with(conn, tags):
     """
     Returns instances tagged with the given tags
-    :return:
+
+    :param conn:
+    :param tags: dict of tags to check. All must be present
+    :return: list of instances with the tags
     """
-    pass
+    log.debug("Searching for instances tagged with: '%s'" % tags)
+
+    # get all instances
+    reservations = conn.get_all_instances()
+    instances = [i for r in reservations for i in r.instances]
+
+    filtered_instances = []
+
+    # iterate through all instances
+    for instance in instances:
+        # iterate through all of our filter tags
+        for tag, tag_value in tags.iteritems():
+            if tag not in instance.__dict__['tags'] or \
+                    instance.__dict__['tags'][tag] != tag_value:
+                log.debug("Instance '%s' filtered out" % instance.id)
+                break
+
+            log.debug("Instance '%s' is tagged with all tags" % instance.id)
+            filtered_instances.append(instance)
+
+    return filtered_instances
+

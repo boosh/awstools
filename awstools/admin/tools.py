@@ -1,10 +1,11 @@
 """
 Admin commands and utilities
 """
+from time import strftime
 import boto.ec2
 
 from awstools.aws import Config
-from awstools.ec2.instance import CurrentInstance
+from awstools.ec2.instance import CurrentInstance, get_instances_tagged_with
 from awstools.logger import get_logger
 
 log = get_logger(__name__)
@@ -14,7 +15,11 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
                      identifier, backup_tag, backup_tag_value,
                      backup_master_tag, backup_master_tag_value):
     """
-    Backup instances, removing old snapshots
+    Backup instances, removing old snapshots.
+
+    If a tag of Role exists on the instance, backups will be named
+    'Role + timestamp'. Otherwise the value of the Name tag will be used
+    (+ timestamp)
 
     :param access_key_id:
     :param secret_access_key:
@@ -44,26 +49,52 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
         aws_access_key_id=config.access_key_id,
         aws_secret_access_key=config.secret_access_key)
 
-    # get the current instance
-    reservations = conn.get_all_instances()
-    instances = [i for r in reservations for i in r.instances]
+    backup_masters = get_instances_tagged_with(conn, {
+        backup_master_tag: backup_master_tag_value})
 
-    # get the tags of the current instance and see if we're the
-    # backup master
-    current_instance_tags = None
+    current_instance_is_backup_master = False
 
-    for instance in instances:
-        if instance.__dict__['id'] == current_instance.id:
-            current_instance_tags = instance.__dict__['tags']
+    for backup_master in backup_masters:
+        if current_instance.id == backup_master.__dict__['id']:
+            current_instance_is_backup_master = True
 
-    log.debug("Tags on the current instance are: %s" % current_instance_tags)
-
-    if not current_instance_tags or backup_master_tag not in \
-            current_instance_tags or \
-            current_instance_tags[backup_master_tag] != backup_master_tag_value:
+    if not current_instance_is_backup_master:
         log.info("This instance is not the backup master. Aborting.")
         return False
 
     log.info("Running on the backup master. Searching for instances to "
              "backup...")
 
+    instances_to_backup = get_instances_tagged_with(conn, {
+        backup_tag: backup_tag_value})
+
+    if not instances_to_backup or len(instances_to_backup) == 0:
+        log.info("No instances tagged for backup.")
+        return False
+
+    log.info("%d instances need backing up" % len(instances_to_backup))
+
+    for instance in instances_to_backup:
+        log.info("Creating AMI of instance %s" % instance.__dict__['id'])
+        now = strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            instance_name = "%s__%s" % (instance.__dict__['tags']['Role'], now)
+        except KeyError:
+            try:
+                instance_name = "%s__%s" % (instance.__dict__['tags']['Name'],
+                                            now)
+            except KeyError:
+                instance_name = "Untitled-%s" % now
+
+        instance_name = instance_name.replace(' ', '-')[:128]
+        instance_name = instance_name.replace(':', '-')
+
+        log.debug("Image name will be '%s'" % instance_name)
+
+        conn.create_image(instance_id=instance.__dict__['id'],
+            name=instance_name,
+            description="Automatic backup at %s" % (now),
+            no_reboot=True)
+
+        log.info("Instance %s snapshotted as %s" % (instance.__dict__['id'],
+                instance_name))
