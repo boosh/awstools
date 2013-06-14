@@ -13,8 +13,8 @@ from awstools.logger import get_logger
 log = get_logger(__name__)
 
 app = aaargh.App(description="Provides higher-level interactions with AWS")
-app.arg('-k', '--access_key_id', type=str, help="AWS access key ID", default=None)
-app.arg('-s', '--secret_access_key', type=str, help="AWS secret key", default=None)
+app.arg('-k', '--access-key-id', type=str, help="AWS access key ID", default=None)
+app.arg('-s', '--secret-access-key', type=str, help="AWS secret key", default=None)
 app.arg('-r', '--region', type=str, help="AWS region", default=None)
 
 @app.cmd(name="backup-instance",

@@ -1,3 +1,4 @@
+import os
 import requests
 
 from awstools.logger import get_logger
@@ -28,8 +29,17 @@ class CurrentInstance(object):
             r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
             instance_id = r.text
         except requests.exceptions.ConnectionError:
+            if 'MOCK_AWSTOOLS_INSTANCE' in os.environ:
+                instance_id = os.environ['MOCK_AWSTOOLS_INSTANCE']
             pass
 
         self.__instance_id = instance_id
 
         return instance_id
+
+def get_instances_tagged_with():
+    """
+    Returns instances tagged with the given tags
+    :return:
+    """
+    pass
