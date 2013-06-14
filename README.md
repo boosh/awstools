@@ -12,10 +12,11 @@ Clone this repo, create a virtualenv, then install dependencies and activate.
 
 backup-instance
 ---------------
-Automated backups. This command can be cronned. To cron it, cron with
-different intervals (e.g. daily, weekly, monthly), and make sure to pass
-a different `--identifier` option. This is used to group the different
-backups and delete old ones.
+Automated backups. Instances with particular tags will be backed up as AMIs.
+
+This command can be cronned. To cron it, cron with different intervals (e.g.
+daily, weekly, monthly), and make sure to pass a different `--identifier`
+option. This is used to group the different backups and delete old ones.
 
 The script will get a list of tags for the instance it's running on. If it
 is tagged with all tags passed in the `--backup-master-tags` option, with
