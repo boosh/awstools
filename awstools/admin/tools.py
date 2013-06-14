@@ -4,6 +4,7 @@ Admin commands and utilities
 from time import strftime
 import boto.ec2
 
+from awstools.exceptions import ConfigurationError
 from awstools.aws import Config
 from awstools.ec2.instance import CurrentInstance, get_instances_tagged_with
 from awstools.logger import get_logger
@@ -18,8 +19,8 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
     Backup instances, removing old snapshots.
 
     If a tag of Role exists on the instance, backups will be named
-    'Role + timestamp'. Otherwise the value of the Name tag will be used
-    (+ timestamp)
+    'Role + timestamp + identifier'. Otherwise the value of the Name tag
+    will be used (+ timestamp + identifier)
 
     :param access_key_id:
     :param secret_access_key:
@@ -32,6 +33,11 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
     :param backup_master_tag_value:
     :return:
     """
+    if not identifier:
+        msg = "Please pass a short identifier string"
+        log.fatal(msg)
+        raise ConfigurationError(msg)
+
     log.debug("Creating config object")
     config = Config(access_key_id=access_key_id,
         secret_access_key=secret_access_key, region=region)
@@ -86,6 +92,8 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
             except KeyError:
                 instance_name = "Untitled-%s" % now
 
+        instance_name += '__' + str(identifier)
+
         instance_name = instance_name.replace(' ', '-')[:128]
         instance_name = instance_name.replace(':', '-')
 
@@ -98,3 +106,9 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
 
         log.info("Instance %s snapshotted as %s" % (instance.__dict__['id'],
                 instance_name))
+
+    # delete old snapshots
+    log.fatal("Implement deletion of old snapshots")
+    # do this by searching for snapshots that match the identifier, and
+    # delete [keep:] snapshots (those more than 'keep' when sorted)
+
