@@ -6,6 +6,12 @@ Project Status
 ==============
 This is incomplete alpha software.
 
+To do
+-----
+    * Implement deleting excess backups for backup-instance
+    * Give the option to create snapshots of volumes instead of AMIs of
+      instances
+
 Installation
 ------------
 Clone this repo, create a virtualenv, then install dependencies and activate.
