@@ -30,7 +30,7 @@ class CurrentInstance(object):
                 'http://169.254.169.254/latest/meta-data/instance-id',
                 timeout=1)
             instance_id = r.text
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.RequestException:
             if 'MOCK_AWSTOOLS_INSTANCE' in os.environ:
                 instance_id = os.environ['MOCK_AWSTOOLS_INSTANCE']
 
