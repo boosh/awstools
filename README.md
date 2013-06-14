@@ -28,7 +28,7 @@ tagged with the tags and values passed in the `--backup-tags` and
 
 Sample invocation:
 
-    ./awstools.py backup-instance --access-key-id=xxx \
+    ./bin/awstools.py backup-instance --access-key-id=xxx \
     --secret-access-key=yyy --region=eu-west-1 --identifier=daily
     --backup-master-tags=BackupMaster,Env --backup-master-tag-values=True,live
     --backup-tags=BackupBy,Env --backup-tag-values=ami,live
