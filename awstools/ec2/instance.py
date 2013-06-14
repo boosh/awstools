@@ -56,14 +56,18 @@ def get_instances_tagged_with(conn, tags):
     # iterate through all instances
     for instance in instances:
         # iterate through all of our filter tags
-        for tag, tag_value in tags.iteritems():
-            if tag not in instance.__dict__['tags'] or \
-                    instance.__dict__['tags'][tag] != tag_value:
+        all_tags_found = True
+        for tag in tags:
+            if tag[0] not in instance.__dict__['tags'] or \
+                    instance.__dict__['tags'][tag[0]] != tag[1]:
                 log.debug("Instance '%s' filtered out" % instance.id)
-                break
+                all_tags_found = False
 
+        if all_tags_found:
             log.debug("Instance '%s' is tagged with all tags" % instance.id)
             filtered_instances.append(instance)
+
+    log.debug("Returning filtered instances: %s" % filtered_instances)
 
     return filtered_instances
 

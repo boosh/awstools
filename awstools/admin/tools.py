@@ -13,8 +13,8 @@ log = get_logger(__name__)
 
 
 def backup_instances(access_key_id, secret_access_key, region, keep,
-                     identifier, backup_tag, backup_tag_value,
-                     backup_master_tag, backup_master_tag_value):
+                     identifier, backup_tags, backup_tag_values,
+                     backup_master_tags, backup_master_tag_values):
     """
     Backup instances, removing old snapshots.
 
@@ -27,22 +27,29 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
     :param region:
     :param keep:
     :param identifier:
-    :param backup_tag:
-    :param backup_tag_value:
-    :param backup_master_tag:
-    :param backup_master_tag_value:
+    :param backup_tags:
+    :param backup_tag_values:
+    :param backup_master_tags:
+    :param backup_master_tag_values:
     :return:
     """
+    log.info("Starting backup process")
+
     if not identifier:
         msg = "Please pass a short identifier string"
         log.fatal(msg)
         raise ConfigurationError(msg)
+
+    backup_tags_list = zip(backup_tags.split(','), backup_tag_values.split(','))
+    backup_master_tags_list = zip(backup_master_tags.split(','),
+        backup_master_tag_values.split(','))
 
     log.debug("Creating config object")
     config = Config(access_key_id=access_key_id,
         secret_access_key=secret_access_key, region=region)
 
     # get the current instance
+    log.info("Getting information about the current instance...")
     current_instance = CurrentInstance()
 
     if not current_instance.id:
@@ -55,8 +62,7 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
         aws_access_key_id=config.access_key_id,
         aws_secret_access_key=config.secret_access_key)
 
-    backup_masters = get_instances_tagged_with(conn, {
-        backup_master_tag: backup_master_tag_value})
+    backup_masters = get_instances_tagged_with(conn, backup_master_tags_list)
 
     current_instance_is_backup_master = False
 
@@ -68,20 +74,19 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
         log.info("This instance is not the backup master. Aborting.")
         return False
 
-    log.info("Running on the backup master. Searching for instances to "
+    log.info("This is the backup master. Searching for instances to "
              "backup...")
 
-    instances_to_backup = get_instances_tagged_with(conn, {
-        backup_tag: backup_tag_value})
+    instances_to_backup = get_instances_tagged_with(conn, backup_tags_list)
 
     if not instances_to_backup or len(instances_to_backup) == 0:
-        log.info("No instances tagged for backup.")
+        log.info("No instances eligible for backup.")
         return False
 
     log.info("%d instances need backing up" % len(instances_to_backup))
 
     for instance in instances_to_backup:
-        log.info("Creating AMI of instance %s" % instance.__dict__['id'])
+        log.info("Creating AMI of instance %s..." % instance.__dict__['id'])
         now = strftime("%Y-%m-%d %H:%M:%S")
         try:
             instance_name = "%s__%s" % (instance.__dict__['tags']['Role'], now)

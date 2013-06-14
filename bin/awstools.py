@@ -30,22 +30,23 @@ app.arg('-r', '--region', type=str, help="AWS region", default=None)
              help="An identifier to add to snapshots. This is used to "
                   "identify which snapshots to delete when deleting old "
                   "snapshots.")
-@app.cmd_arg('--backup-tag', type=str,
-             help="Only instances tagged with this tag will be backed up. "
+@app.cmd_arg('--backup-tags', type=str,
+             help="Only instances tagged with these tags will be backed up. "
                   "Default=BackupBy",
              default="BackupBy")
-@app.cmd_arg('--backup-tag-value', type=str,
-    help="Only instances where the value of the backup-tag is this will be "
-         "backed up. Default=ami", default="ami")
-@app.cmd_arg('--backup-master-tag', type=str,
-             help="Only instances tagged with this tag will take backups "
+@app.cmd_arg('--backup-tag-values', type=str,
+    help="Only instances where the values of the tags given by backup-tags "
+         "match these will be backed up. Default=ami", default="ami")
+@app.cmd_arg('--backup-master-tags', type=str,
+             help="Only instances tagged with these tags will take backups "
                   "(this lets this command be cronned on all instances, but "
-                  "only those with this tag will actually take backups). "
+                  "only those with these tags will actually take backups). "
                   "Default=BackupMaster",
              default="BackupMaster")
-@app.cmd_arg('--backup-master-tag-value', type=str,
-    help="Only instances where the value of the backup-master-tag is this "
-         "will be actually run this command. Default=True", default="True")
+@app.cmd_arg('--backup-master-tag-values', type=str,
+             help="Only instances where the values of the backup-master-tags match "
+                 "these will be actually run this command. Default=True",
+             default="True")
 def backup_instance(**kwargs):
     for key in sorted(locals().keys()):
         log.debug("Got arg '%s' = '%s'" % (key, locals().get(key)))
