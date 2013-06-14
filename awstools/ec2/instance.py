@@ -27,7 +27,8 @@ class CurrentInstance(object):
         instance_id = None
         try:
             r = requests.get(
-                'http://169.254.169.254/latest/meta-data/instance-id')
+                'http://169.254.169.254/latest/meta-data/instance-id',
+                timeout=1)
             instance_id = r.text
         except requests.exceptions.ConnectionError:
             if 'MOCK_AWSTOOLS_INSTANCE' in os.environ:
