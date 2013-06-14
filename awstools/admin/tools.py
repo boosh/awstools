@@ -40,13 +40,14 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
         log.fatal(msg)
         raise ConfigurationError(msg)
 
-    backup_tags_list = zip(backup_tags.split(','), backup_tag_values.split(','))
+    backup_tags_list = zip(backup_tags.split(','),
+                           backup_tag_values.split(','))
     backup_master_tags_list = zip(backup_master_tags.split(','),
-        backup_master_tag_values.split(','))
+                                  backup_master_tag_values.split(','))
 
     log.debug("Creating config object")
     config = Config(access_key_id=access_key_id,
-        secret_access_key=secret_access_key, region=region)
+                    secret_access_key=secret_access_key, region=region)
 
     # get the current instance
     log.info("Getting information about the current instance...")
@@ -58,7 +59,8 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
 
     log.info("Current instance ID is %s" % current_instance.id)
 
-    conn = boto.ec2.connect_to_region(config.region_name,
+    conn = boto.ec2.connect_to_region(
+        config.region_name,
         aws_access_key_id=config.access_key_id,
         aws_secret_access_key=config.secret_access_key)
 
@@ -104,16 +106,16 @@ def backup_instances(access_key_id, secret_access_key, region, keep,
 
         log.debug("Image name will be '%s'" % instance_name)
 
-        conn.create_image(instance_id=instance.__dict__['id'],
+        conn.create_image(
+            instance_id=instance.__dict__['id'],
             name=instance_name,
             description="Automatic backup at %s" % (now),
             no_reboot=True)
 
         log.info("Instance %s snapshotted as %s" % (instance.__dict__['id'],
-                instance_name))
+                 instance_name))
 
     # delete old snapshots
     log.fatal("Implement deletion of old snapshots")
     # do this by searching for snapshots that match the identifier, and
     # delete [keep:] snapshots (those more than 'keep' when sorted)
-

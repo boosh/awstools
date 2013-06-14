@@ -5,7 +5,8 @@ import sys
 import os
 
 # add the parent dir to the path so it can load the library
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '..')))
 
 from awstools.admin.tools import backup_instances
 from awstools.logger import get_logger
@@ -13,9 +14,12 @@ from awstools.logger import get_logger
 log = get_logger(__name__)
 
 app = aaargh.App(description="Provides higher-level interactions with AWS")
-app.arg('-k', '--access-key-id', type=str, help="AWS access key ID", default=None)
-app.arg('-s', '--secret-access-key', type=str, help="AWS secret key", default=None)
+app.arg('-k', '--access-key-id', type=str, help="AWS access key ID",
+        default=None)
+app.arg('-s', '--secret-access-key', type=str, help="AWS secret key",
+        default=None)
 app.arg('-r', '--region', type=str, help="AWS region", default=None)
+
 
 @app.cmd(name="backup-instance",
          help="Backup instances by creating AMIs from them. This is intended "
@@ -35,8 +39,9 @@ app.arg('-r', '--region', type=str, help="AWS region", default=None)
                   "Default=BackupBy",
              default="BackupBy")
 @app.cmd_arg('--backup-tag-values', type=str,
-    help="Only instances where the values of the tags given by backup-tags "
-         "match these will be backed up. Default=ami", default="ami")
+             help="Only instances where the values of the tags given by "
+                  "backup-tags match these will be backed up. Default=ami",
+             default="ami")
 @app.cmd_arg('--backup-master-tags', type=str,
              help="Only instances tagged with these tags will take backups "
                   "(this lets this command be cronned on all instances, but "
@@ -44,8 +49,9 @@ app.arg('-r', '--region', type=str, help="AWS region", default=None)
                   "Default=BackupMaster",
              default="BackupMaster")
 @app.cmd_arg('--backup-master-tag-values', type=str,
-             help="Only instances where the values of the backup-master-tags match "
-                 "these will be actually run this command. Default=True",
+             help="Only instances where the values of the backup-master-tags "
+                  "match these will be actually run this command. "
+                  "Default=True",
              default="True")
 def backup_instance(**kwargs):
     for key in sorted(locals().keys()):

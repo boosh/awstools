@@ -2,5 +2,6 @@ aaargh==0.4
 argparse==1.2.1
 boto==2.9.5
 distribute==0.6.24
+pep8==1.4.5
 requests==1.2.3
 wsgiref==0.1.2

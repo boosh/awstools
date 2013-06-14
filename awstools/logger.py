@@ -11,8 +11,8 @@ LOG_CONCISE = 'CONCISE'
 
 def get_log_format():
     """
-Return the log format to use
-"""
+    Return the log format to use
+    """
     try:
         log_format_verbosity = os.environ[LOG_VERBOSITY].upper().strip()
     except KeyError:
@@ -20,7 +20,7 @@ Return the log format to use
 
     if log_format_verbosity == LOG_CONCISE:
         format = '%(asctime)s %(name)s (%(lineno)d) %(levelname)s: %(message)s'
-    else: # verbose by default
+    else:           # verbose by default
         format = '%(asctime)s %(pathname)s %(name)s (%(lineno)d) '\
                  '%(levelname)s: %(message)s'
 
@@ -29,16 +29,16 @@ Return the log format to use
 
 def get_logger(name):
     """
-Set up a logger. The log level can be set by setting an environment
-variable called AWSTOOLS_LOG_LEVEL to a valid log level, or NONE to disable
-all logging output.
+    Set up a logger. The log level can be set by setting an environment
+    variable called AWSTOOLS_LOG_LEVEL to a valid log level, or NONE to disable
+    all logging output.
 
-string name: The name of the logger. Set this to __name__ in the calling
-code (unless you have a VERY good reason
-not to)
+    string name: The name of the logger. Set this to __name__ in the calling
+    code (unless you have a VERY good reason
+    not to)
 
-returns: A Logger instance
-"""
+    returns: A Logger instance
+    """
     log = logging.getLogger(name)
 
     if not log.handlers:
@@ -50,8 +50,8 @@ returns: A Logger instance
         log_level = os.environ[LOG_LEVEL].upper()
         if log_level != 'NONE':
             raise ConfigurationError("'%s' is not a valid log level. Use a "
-                                   "valid log level or 'NONE' to disable "
-                                   "logging output." % log_level)
+                                     "valid log level or 'NONE' to disable "
+                                     "logging output." % log_level)
     except KeyError:
         log_level = logging.INFO
 

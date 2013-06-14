@@ -21,21 +21,22 @@ class CurrentInstance(object):
         :return:
         """
         log.debug("Cached instance ID is %s" % self.__instance_id)
-        if self.__instance_id != False:
+        if self.__instance_id is not False:
             return self.__instance_id
 
         instance_id = None
         try:
-            r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
+            r = requests.get(
+                'http://169.254.169.254/latest/meta-data/instance-id')
             instance_id = r.text
         except requests.exceptions.ConnectionError:
             if 'MOCK_AWSTOOLS_INSTANCE' in os.environ:
                 instance_id = os.environ['MOCK_AWSTOOLS_INSTANCE']
-            pass
 
         self.__instance_id = instance_id
 
         return instance_id
+
 
 def get_instances_tagged_with(conn, tags):
     """
@@ -70,4 +71,3 @@ def get_instances_tagged_with(conn, tags):
     log.debug("Returning filtered instances: %s" % filtered_instances)
 
     return filtered_instances
-
